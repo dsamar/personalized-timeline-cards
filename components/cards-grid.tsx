@@ -18,6 +18,7 @@ interface CardsGridProps {
 
 export function CardsGrid({ cards, onCardUpdate, onAllCardsUpdate, onCardRemove }: CardsGridProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
+  const [editingCardId, setEditingCardId] = useState<string | null>(null)
 
   if (cards.length === 0) return null
 
@@ -51,6 +52,10 @@ export function CardsGrid({ cards, onCardUpdate, onAllCardsUpdate, onCardRemove 
 
     // Update all cards at once
     onAllCardsUpdate(allUpdates)
+  }
+
+  const handleEditingChange = (cardId: string | null) => {
+    setEditingCardId(cardId)
   }
 
   return (
@@ -106,6 +111,8 @@ export function CardsGrid({ cards, onCardUpdate, onAllCardsUpdate, onCardRemove 
               index={index}
               onUpdate={(updates) => onCardUpdate(card.id, updates)}
               onRemove={() => onCardRemove(card.id)}
+              isEditingCard={editingCardId === card.id}
+              onEditingChange={handleEditingChange}
             />
           ))}
         </div>

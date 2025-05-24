@@ -1,6 +1,4 @@
 "use client"
-
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,13 +12,13 @@ interface CardItemProps {
   index: number
   onUpdate: (updates: Partial<TimelineCard>) => void
   onRemove: () => void
+  isEditingCard: boolean
+  onEditingChange: (cardId: string | null) => void
 }
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-export function CardItem({ card, index, onUpdate, onRemove }: CardItemProps) {
-  const [isEditing, setIsEditing] = useState(false)
-
+export function CardItem({ card, index, onUpdate, onRemove, isEditingCard, onEditingChange }: CardItemProps) {
   const handleEventNameUpdate = (newName: string) => {
     // Limit event names to 20 characters for better display
     const limitedName = newName.length > 20 ? newName.substring(0, 20) : newName
@@ -71,11 +69,10 @@ export function CardItem({ card, index, onUpdate, onRemove }: CardItemProps) {
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Label className="text-xs text-muted-foreground">#{index + 1}</Label>
-          <Label className="text-xs text-muted-foreground">Event Name (max 20 chars):</Label>
         </div>
 
-        {isEditing ? (
-          <div className="flex items-center gap-2">
+        {isEditingCard ? (
+          <div className="flex items-center gap-2 p-2 bg-blue-50 border-2 border-blue-300 rounded-md">
             <Input
               value={card.eventName}
               onChange={(e) => handleEventNameUpdate(e.target.value)}
@@ -84,23 +81,33 @@ export function CardItem({ card, index, onUpdate, onRemove }: CardItemProps) {
               maxLength={20}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  setIsEditing(false)
+                  onEditingChange(null)
                 } else if (e.key === "Escape") {
-                  setIsEditing(false)
+                  onEditingChange(null)
                 }
               }}
               className="flex-1"
             />
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(false)} className="px-2">
+            <Button variant="outline" size="sm" onClick={() => onEditingChange(null)} className="px-2">
               ✓
             </Button>
           </div>
         ) : (
-          <div className="flex items-center justify-between">
+          <div
+            className="flex items-center justify-between cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
+            onClick={() => onEditingChange(card.id)}
+          >
             <span className="font-medium text-muted-foreground italic">
               {card.eventName || "Click to add event name"}
             </span>
-            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                onEditingChange(card.id)
+              }}
+            >
               <Edit2 className="h-3 w-3" />
             </Button>
           </div>
@@ -113,13 +120,13 @@ export function CardItem({ card, index, onUpdate, onRemove }: CardItemProps) {
             Date:
           </Label>
 
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {/* Month selector */}
             <Select
               value={currentMonth !== undefined ? currentMonth.toString() : ""}
               onValueChange={(value) => handleMonthUpdate(Number.parseInt(value))}
             >
-              <SelectTrigger className="w-24">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Month" />
               </SelectTrigger>
               <SelectContent>
@@ -136,31 +143,20 @@ export function CardItem({ card, index, onUpdate, onRemove }: CardItemProps) {
               type="number"
               value={card.year}
               onChange={(e) => handleYearUpdate(Number.parseInt(e.target.value) || card.year)}
-              className="w-20"
+              className="w-full"
               min="1000"
               max="2100"
               placeholder="Year"
             />
-
-            <Button variant="ghost" size="sm" onClick={onRemove} className="text-destructive hover:text-destructive">
-              <Trash2 className="h-3 w-3" />
-            </Button>
           </div>
         </div>
 
-        {/* Date source info */}
-        <div className="text-xs text-muted-foreground space-y-1">
-          <div>Source: {card.dateSource}</div>
-          {card.fullDate && (
-            <div>
-              Full date: {card.fullDate.toLocaleDateString()}
-              {currentMonth !== undefined && (
-                <span className="ml-2 text-primary">
-                  → {monthNames[currentMonth]} {card.year}
-                </span>
-              )}
-            </div>
-          )}
+        {/* Delete button - centered */}
+        <div className="flex justify-center pt-2">
+          <Button variant="destructive" size="sm" onClick={onRemove} className="flex items-center gap-1">
+            <Trash2 className="h-4 w-4" />
+            Remove
+          </Button>
         </div>
       </div>
     </div>
