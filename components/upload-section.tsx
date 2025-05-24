@@ -52,7 +52,7 @@ export function UploadSection({ cards, onCardsAdd }: UploadSectionProps) {
     accept: {
       "image/*": [".jpeg", ".jpg", ".png", ".gif", ".bmp", ".webp"],
     },
-    maxFiles: 24,
+    maxFiles: 25,
   })
 
   return (
@@ -60,7 +60,7 @@ export function UploadSection({ cards, onCardsAdd }: UploadSectionProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          Upload Images ({cards.length}/24)
+          Upload Images ({cards.length}/25)
         </CardTitle>
       </CardHeader>
       <CardContent>

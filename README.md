@@ -224,7 +224,6 @@ Uses React's built-in state management with:
 
 ## 🐛 Known Limitations
 
-- Maximum 24 cards (PDF layout constraint)
 - Requires modern browser with Canvas support
 - Large images may cause memory issues
 - EXIF data not available in all image formats

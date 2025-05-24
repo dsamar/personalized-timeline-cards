@@ -43,8 +43,19 @@ export async function addImageToCard(
     const dateText = formatDateText(card, yearCounts)
     const eventText = card.eventName || ""
 
-    // TOP HALF: Year side (with sequence ID) - FLIPPED
-    await drawFlippedCardFace(pdf, normalBWImageData, dateText, false, x, y, cardWidth, halfHeight, sequenceId)
+    // TOP HALF: Year side (with sequence ID and event name) - FLIPPED
+    await drawFlippedCardFace(
+      pdf,
+      normalBWImageData,
+      dateText,
+      false,
+      x,
+      y,
+      cardWidth,
+      halfHeight,
+      sequenceId,
+      eventText,
+    )
 
     // BOTTOM HALF: Event side (with sequence ID) - NORMAL
     await drawCardFace(pdf, normalBWImageData, eventText, true, x, y + halfHeight, cardWidth, halfHeight, sequenceId)
@@ -82,8 +93,8 @@ export function addPlaceholderToCard(
   const dateText = formatDateText(card, yearCounts)
   const eventText = card.eventName || ""
 
-  // TOP HALF: Year side (flipped, with sequence ID)
-  drawFlippedCardFace(pdf, placeholderImageData, dateText, false, x, y, cardWidth, halfHeight, sequenceId)
+  // TOP HALF: Year side (flipped, with sequence ID and event name)
+  drawFlippedCardFace(pdf, placeholderImageData, dateText, false, x, y, cardWidth, halfHeight, sequenceId, eventText)
 
   // BOTTOM HALF: Event side (normal, with sequence ID)
   drawCardFace(pdf, placeholderImageData, eventText, true, x, y + halfHeight, cardWidth, halfHeight, sequenceId)

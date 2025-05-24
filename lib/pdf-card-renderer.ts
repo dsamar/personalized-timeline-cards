@@ -7,6 +7,7 @@ export async function renderCardFace(
   cardWidth: number,
   halfHeight: number,
   sequenceId?: number,
+  eventName?: string, // Add optional event name parameter
 ): Promise<HTMLCanvasElement> {
   // Create a canvas to render the card face
   const canvas = document.createElement("canvas")
@@ -22,11 +23,11 @@ export async function renderCardFace(
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   // Calculate dimensions - REDUCED MARGINS for bigger images
-  const imageMargin = 1.5 * scale // Reduced from 3 * scale
-  const textHeight = 12 * scale
-  const textSpacing = 2 * scale // Reduced from 3 * scale
+  const imageMargin = 1.5 * scale
+  const textHeight = isEventSide ? 12 * scale : 18 * scale // Taller for year side with two lines
+  const textSpacing = 2 * scale
   const sequenceIdHeight = 6 * scale
-  const sequenceIdSpacing = 1 * scale // Reduced from 2 * scale
+  const sequenceIdSpacing = 1 * scale
 
   // Reserve space for sequence ID at bottom
   const availableImageHeight =
@@ -62,7 +63,7 @@ export async function renderCardFace(
 
   // Draw text banner below image
   const bannerY = imageY + imageHeight + textSpacing
-  const bannerWidth = canvas.width - 4 * scale // Reduced from 8 * scale
+  const bannerWidth = canvas.width - 4 * scale
   const bannerHeight = textHeight
   const bannerX = (canvas.width - bannerWidth) / 2
 
@@ -70,8 +71,8 @@ export async function renderCardFace(
     // Event banner - black background, white text
     drawCanvasEventBanner(ctx, bannerX, bannerY, bannerWidth, bannerHeight, text, scale)
   } else {
-    // Year badge - white background, black text
-    drawCanvasYearBadge(ctx, bannerX, bannerY, bannerWidth, bannerHeight, text, scale)
+    // Year badge - white background, black text, with event name
+    drawCanvasYearBadge(ctx, bannerX, bannerY, bannerWidth, bannerHeight, text, scale, eventName)
   }
 
   // Draw sequence ID at the bottom (invisible - white on white)
@@ -183,8 +184,9 @@ function drawCanvasYearBadge(
   y: number,
   width: number,
   height: number,
-  text: string,
+  dateText: string,
   scale: number,
+  eventName?: string,
 ) {
   // Draw white rectangular banner with black border (full width like event banner)
   ctx.fillStyle = "#ffffff"
@@ -195,12 +197,39 @@ function drawCanvasYearBadge(
   ctx.fillRect(x, y, width, height)
   ctx.strokeRect(x, y, width, height)
 
-  // Draw year text (black text on white background)
+  // Draw date and event name (black text on white background)
   ctx.fillStyle = "#000000"
-  ctx.font = `bold ${8 * scale}px Arial`
   ctx.textAlign = "center"
-  ctx.textBaseline = "middle"
-  ctx.fillText(text, x + width / 2, y + height / 2)
+
+  if (eventName && eventName.trim()) {
+    // Two lines: date on top, event name below
+    const lineHeight = height / 2
+
+    // Date line (top half)
+    ctx.font = `bold ${7 * scale}px Arial`
+    ctx.textBaseline = "middle"
+    ctx.fillText(dateText, x + width / 2, y + lineHeight / 2)
+
+    // Event name line (bottom half)
+    ctx.font = `${5 * scale}px Arial`
+
+    // Truncate event name if too long
+    let displayEventName = eventName
+    const availableWidth = width - 4 * scale
+    while (ctx.measureText(displayEventName).width > availableWidth && displayEventName.length > 8) {
+      displayEventName = displayEventName.slice(0, -1)
+    }
+    if (displayEventName.length < eventName.length) {
+      displayEventName += "..."
+    }
+
+    ctx.fillText(displayEventName, x + width / 2, y + lineHeight + lineHeight / 2)
+  } else {
+    // Single line: just date
+    ctx.font = `bold ${8 * scale}px Arial`
+    ctx.textBaseline = "middle"
+    ctx.fillText(dateText, x + width / 2, y + height / 2)
+  }
 }
 
 function drawRoundedRect(
@@ -234,9 +263,10 @@ export async function drawCardFace(
   cardWidth: number,
   halfHeight: number,
   sequenceId?: number,
+  eventName?: string,
 ) {
   // Render card face to canvas
-  const canvas = await renderCardFace(imageData, text, isEventSide, cardWidth, halfHeight, sequenceId)
+  const canvas = await renderCardFace(imageData, text, isEventSide, cardWidth, halfHeight, sequenceId, eventName)
 
   // Convert canvas to image data and add to PDF
   const canvasImageData = canvas.toDataURL("image/jpeg", 0.85)
@@ -253,9 +283,10 @@ export async function drawFlippedCardFace(
   cardWidth: number,
   halfHeight: number,
   sequenceId?: number,
+  eventName?: string,
 ) {
   // Render normal card face to canvas
-  const canvas = await renderCardFace(imageData, text, isEventSide, cardWidth, halfHeight, sequenceId)
+  const canvas = await renderCardFace(imageData, text, isEventSide, cardWidth, halfHeight, sequenceId, eventName)
 
   // Flip the entire canvas 180 degrees
   const flippedCanvas = flipCanvas(canvas)
