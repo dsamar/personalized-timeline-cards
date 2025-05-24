@@ -24,7 +24,7 @@ export async function renderCardFace(
 
   // Calculate dimensions - REDUCED MARGINS for bigger images
   const imageMargin = 1.5 * scale
-  const textHeight = isEventSide ? 12 * scale : 18 * scale // Taller for year side with two lines
+  const textHeight = 20 * scale
   const textSpacing = 2 * scale
   const sequenceIdHeight = 6 * scale
   const sequenceIdSpacing = 1 * scale
@@ -108,6 +108,32 @@ function drawSequenceId(ctx: CanvasRenderingContext2D, centerX: number, y: numbe
   ctx.fillText(sequenceId.toString(), centerX, y)
 }
 
+/* ----------  UTILS  ---------- */
+
+/** monospace char width probe (cached) */
+function monoCharWidth(ctx: CanvasRenderingContext2D, scale: number): number {
+  const key = `mono-${scale}`;
+  const cache = (monoCharWidth as any)[key];
+  if (cache) return cache;
+  ctx.font = `${scale}px 'Courier New', monospace`;
+  const w = ctx.measureText("M").width;
+  (monoCharWidth as any)[key] = w;
+  return w;
+}
+
+/** font size that guarantees `maxChars` fit */
+function calcMonoFontSize(
+  ctx: CanvasRenderingContext2D,
+  avail: number,
+  maxChars: number,
+  scale: number
+) {
+  const cw = monoCharWidth(ctx, scale);
+  return Math.floor((avail / (cw * maxChars)) * scale);
+}
+
+/* ----------  EVENT BANNER  ---------- */
+
 function drawCanvasEventBanner(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -115,68 +141,29 @@ function drawCanvasEventBanner(
   width: number,
   height: number,
   text: string,
-  scale: number,
+  scale: number
 ) {
-  // Draw black banner background
-  ctx.fillStyle = "#000000"
-  ctx.fillRect(x, y, width, height)
+  ctx.fillStyle = "#000";
+  ctx.fillRect(x, y, width, height);
 
-  if (text.trim()) {
-    // Start with much smaller font size for 2-5 word phrases
-    const availableWidth = width - 6 * scale
-    let fontSize = 5 * scale // Much smaller starting font size
+  const t = text.trim().slice(0, 20);               // hard cap
+  const tier = t.length <= 5 ? 5 : t.length <= 15 ? 15 : 20;
 
-    ctx.fillStyle = "#ffffff"
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
+  const fontPx = calcMonoFontSize(ctx, width - 4 * scale, tier, scale);
+  ctx.font = `bold ${fontPx}px 'Courier New', monospace`;
+  ctx.fillStyle = "#fff";
+  ctx.textBaseline = "middle";
 
-    // Test different font sizes to find the largest that fits
-    for (let testSize = 5 * scale; testSize >= 3 * scale; testSize -= 0.25 * scale) {
-      ctx.font = `bold ${testSize}px Arial`
-      const textWidth = ctx.measureText(text).width
-      if (textWidth <= availableWidth) {
-        fontSize = testSize
-        break
-      }
-    }
+  // width of the actual string (monospace ⇒ len * charW)
+  const charW = monoCharWidth(ctx, fontPx);
+  const txtW  = charW * t.length;
+  const cx    = x + width / 2 - txtW / 2;           // left-aligned start
 
-    ctx.font = `bold ${fontSize}px Arial`
-
-    // Only truncate if text is extremely long (more than 25 characters)
-    let displayText = text
-    if (text.length > 25 && ctx.measureText(text).width > availableWidth) {
-      // Try to fit without truncation first by going even smaller
-      for (let testSize = fontSize; testSize >= 2.5 * scale; testSize -= 0.25 * scale) {
-        ctx.font = `bold ${testSize}px Arial`
-        if (ctx.measureText(text).width <= availableWidth) {
-          fontSize = testSize
-          displayText = text
-          break
-        }
-      }
-
-      // Only if we absolutely can't fit it, then truncate
-      if (ctx.measureText(text).width > availableWidth) {
-        while (ctx.measureText(displayText + "...").width > availableWidth && displayText.length > 8) {
-          displayText = displayText.slice(0, -1)
-        }
-        if (displayText.length < text.length) {
-          displayText += "..."
-        }
-      }
-    }
-
-    ctx.font = `bold ${fontSize}px Arial`
-    ctx.fillText(displayText, x + width / 2, y + height / 2)
-  } else {
-    // Question marks
-    ctx.fillStyle = "#ffffff"
-    ctx.font = `bold ${6 * scale}px Arial`
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
-    ctx.fillText("? ? ?", x + width / 2, y + height / 2)
-  }
+  ctx.textAlign = "left";
+  ctx.fillText(t, cx, y + height / 2);
 }
+
+/* ----------  YEAR + EVENT BADGE  ---------- */
 
 function drawCanvasYearBadge(
   ctx: CanvasRenderingContext2D,
@@ -186,71 +173,39 @@ function drawCanvasYearBadge(
   height: number,
   dateText: string,
   scale: number,
-  eventName?: string,
+  eventName?: string
 ) {
-  // Draw white rectangular banner with black border (full width like event banner)
-  ctx.fillStyle = "#ffffff"
-  ctx.strokeStyle = "#000000"
-  ctx.lineWidth = 0.3 * scale
+  // frame
+  ctx.fillStyle = "#fff";
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 0.3 * scale;
+  ctx.fillRect(x, y, width, height);
+  ctx.strokeRect(x, y, width, height);
 
-  // Use same rectangular style as event banner
-  ctx.fillRect(x, y, width, height)
-  ctx.strokeRect(x, y, width, height)
+  const avail = width - 4 * scale;
 
-  // Draw date and event name (black text on white background)
-  ctx.fillStyle = "#000000"
-  ctx.textAlign = "center"
+  // ---- date line (fixed 8 chars) ----
+  const datePx = calcMonoFontSize(ctx, avail, 8, scale);
+  ctx.font = `bold ${datePx}px 'Courier New', monospace`;
+  ctx.fillStyle = "#000";
+  ctx.textBaseline = "middle";
 
-  if (eventName && eventName.trim()) {
-    // Two lines: date on top, event name below
-    const lineHeight = height / 2
+  let charW = monoCharWidth(ctx, datePx);
+  let cx = x + width / 2 - charW * dateText.length / 2;
+  ctx.textAlign = "left";
+  ctx.fillText(dateText, cx, y + height / 4);
 
-    // Date line (top half)
-    ctx.font = `bold ${7 * scale}px Arial`
-    ctx.textBaseline = "middle"
-    ctx.fillText(dateText, x + width / 2, y + lineHeight / 2)
+  // ---- optional event line ----
+  if (eventName?.trim()) {
+    const t = eventName.trim().slice(0, 20);
+    const tier = t.length <= 5 ? 5 : t.length <= 15 ? 15 : 20;
+    const evPx = calcMonoFontSize(ctx, avail, tier, scale);
 
-    // Event name line (bottom half)
-    ctx.font = `${5 * scale}px Arial`
-
-    // Truncate event name if too long
-    let displayEventName = eventName
-    const availableWidth = width - 4 * scale
-    while (ctx.measureText(displayEventName).width > availableWidth && displayEventName.length > 8) {
-      displayEventName = displayEventName.slice(0, -1)
-    }
-    if (displayEventName.length < eventName.length) {
-      displayEventName += "..."
-    }
-
-    ctx.fillText(displayEventName, x + width / 2, y + lineHeight + lineHeight / 2)
-  } else {
-    // Single line: just date
-    ctx.font = `bold ${8 * scale}px Arial`
-    ctx.textBaseline = "middle"
-    ctx.fillText(dateText, x + width / 2, y + height / 2)
+    ctx.font = `${evPx}px 'Courier New', monospace`;
+    charW = monoCharWidth(ctx, evPx);
+    cx = x + width / 2 - charW * t.length / 2;
+    ctx.fillText(t, cx, y + (3 * height) / 4);
   }
-}
-
-function drawRoundedRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number,
-) {
-  ctx.beginPath()
-  ctx.moveTo(x + radius, y)
-  ctx.lineTo(x + width - radius, y)
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius)
-  ctx.lineTo(x + width, y + height - radius)
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
-  ctx.lineTo(x + radius, y + height)
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius)
-  ctx.lineTo(x, y + radius)
-  ctx.quadraticCurveTo(x, y, x + radius, y)
-  ctx.closePath()
 }
 
 export async function drawCardFace(

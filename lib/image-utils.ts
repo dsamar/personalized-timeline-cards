@@ -61,12 +61,12 @@ export function cropImageTo3x4(img: HTMLImageElement, targetWidth: number, targe
 
   // Convert to timeless black and white using advanced processing
   timelessBW(optimizedCanvas, {
-    enableLocalContrast: false, // Keep it fast for card generation
+    enableLocalContrast: false,
     addGrain: true,
-    addVignette: false, // Cards look better without vignette
+    addVignette: true,
     enableDithering: false,
-    sCurveStrength: 6, // Slightly less dramatic for cards
-    grainIntensity: 12, // Subtle grain
+    sCurveStrength: 6,
+    grainIntensity: 12,
   })
 
   return optimizedCanvas.toDataURL("image/jpeg", 0.85)
