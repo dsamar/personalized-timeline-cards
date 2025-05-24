@@ -21,12 +21,12 @@ export async function renderCardFace(
   ctx.fillStyle = "#ffffff"
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-  // Calculate dimensions
-  const imageMargin = 3 * scale
+  // Calculate dimensions - REDUCED MARGINS for bigger images
+  const imageMargin = 1.5 * scale // Reduced from 3 * scale
   const textHeight = 12 * scale
-  const textSpacing = 3 * scale
+  const textSpacing = 2 * scale // Reduced from 3 * scale
   const sequenceIdHeight = 6 * scale
-  const sequenceIdSpacing = 2 * scale
+  const sequenceIdSpacing = 1 * scale // Reduced from 2 * scale
 
   // Reserve space for sequence ID at bottom
   const availableImageHeight =
@@ -62,7 +62,7 @@ export async function renderCardFace(
 
   // Draw text banner below image
   const bannerY = imageY + imageHeight + textSpacing
-  const bannerWidth = canvas.width - 8 * scale
+  const bannerWidth = canvas.width - 4 * scale // Reduced from 8 * scale
   const bannerHeight = textHeight
   const bannerX = (canvas.width - bannerWidth) / 2
 
@@ -186,26 +186,21 @@ function drawCanvasYearBadge(
   text: string,
   scale: number,
 ) {
-  // Calculate badge size based on text
-  const badgeWidth = Math.min(width, text.length * 4 * scale + 10 * scale)
-  const badgeX = x + (width - badgeWidth) / 2
-
-  // Draw white oval badge with black border
+  // Draw white rectangular banner with black border (full width like event banner)
   ctx.fillStyle = "#ffffff"
   ctx.strokeStyle = "#000000"
   ctx.lineWidth = 0.3 * scale
 
-  const cornerRadius = Math.min(badgeWidth, height) * 0.4
-  drawRoundedRect(ctx, badgeX, y, badgeWidth, height, cornerRadius)
-  ctx.fill()
-  ctx.stroke()
+  // Use same rectangular style as event banner
+  ctx.fillRect(x, y, width, height)
+  ctx.strokeRect(x, y, width, height)
 
-  // Draw year text
+  // Draw year text (black text on white background)
   ctx.fillStyle = "#000000"
   ctx.font = `bold ${8 * scale}px Arial`
   ctx.textAlign = "center"
   ctx.textBaseline = "middle"
-  ctx.fillText(text, badgeX + badgeWidth / 2, y + height / 2)
+  ctx.fillText(text, x + width / 2, y + height / 2)
 }
 
 function drawRoundedRect(

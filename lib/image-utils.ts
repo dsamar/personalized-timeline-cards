@@ -1,3 +1,34 @@
+import { timelessBW } from "./timeless-bw"
+
+/**
+ * Downscale image to optimal resolution for 300 DPI printing
+ * Cards are 45mm wide in PDF, so we need ~531 pixels width at 300 DPI
+ * We'll use 600px width (over-estimate) to ensure crisp printing
+ */
+function downscaleForPrint(canvas: HTMLCanvasElement): HTMLCanvasElement {
+  const targetWidth = 600 // Over-estimate for 300 DPI at 45mm card width
+  const targetHeight = 800 // Maintain 3:4 aspect ratio (600 * 4/3)
+
+  // Only downscale if image is larger than target
+  if (canvas.width <= targetWidth && canvas.height <= targetHeight) {
+    return canvas
+  }
+
+  const downscaledCanvas = document.createElement("canvas")
+  const ctx = downscaledCanvas.getContext("2d")!
+
+  downscaledCanvas.width = targetWidth
+  downscaledCanvas.height = targetHeight
+
+  // Use high-quality scaling
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = "high"
+
+  ctx.drawImage(canvas, 0, 0, targetWidth, targetHeight)
+
+  return downscaledCanvas
+}
+
 export function cropImageTo3x4(img: HTMLImageElement, targetWidth: number, targetHeight: number): string {
   const canvas = document.createElement("canvas")
   const ctx = canvas.getContext("2d")!
@@ -25,83 +56,18 @@ export function cropImageTo3x4(img: HTMLImageElement, targetWidth: number, targe
   // Draw the image
   ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height)
 
-  // Convert to black and white
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-  const data = imageData.data
+  // Downscale to optimal print resolution before processing
+  const optimizedCanvas = downscaleForPrint(canvas)
 
-  for (let i = 0; i < data.length; i += 4) {
-    // Calculate grayscale value using luminance formula
-    const gray = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2])
+  // Convert to timeless black and white using advanced processing
+  timelessBW(optimizedCanvas, {
+    enableLocalContrast: false, // Keep it fast for card generation
+    addGrain: true,
+    addVignette: false, // Cards look better without vignette
+    enableDithering: false,
+    sCurveStrength: 6, // Slightly less dramatic for cards
+    grainIntensity: 12, // Subtle grain
+  })
 
-    // Set RGB to the same grayscale value
-    data[i] = gray // Red
-    data[i + 1] = gray // Green
-    data[i + 2] = gray // Blue
-    // Alpha (data[i + 3]) stays the same
-  }
-
-  // Put the modified image data back
-  ctx.putImageData(imageData, 0, 0)
-
-  return canvas.toDataURL("image/jpeg", 0.85)
-}
-
-export function createRotatedBWImage(img: HTMLImageElement, targetWidth: number, targetHeight: number): string {
-  const canvas = document.createElement("canvas")
-  const ctx = canvas.getContext("2d")!
-
-  const scale = 3
-  canvas.width = targetWidth * scale
-  canvas.height = targetHeight * scale
-
-  const targetAspectRatio = 3 / 4
-  const imgAspectRatio = img.width / img.height
-
-  let sourceX = 0
-  let sourceY = 0
-  let sourceWidth = img.width
-  let sourceHeight = img.height
-
-  if (imgAspectRatio > targetAspectRatio) {
-    sourceWidth = img.height * targetAspectRatio
-    sourceX = (img.width - sourceWidth) / 2
-  } else {
-    sourceHeight = img.width / targetAspectRatio
-    sourceY = (img.height - sourceHeight) / 2
-  }
-
-  // Draw the image rotated 180 degrees
-  ctx.translate(canvas.width / 2, canvas.height / 2)
-  ctx.rotate(Math.PI)
-  ctx.drawImage(
-    img,
-    sourceX,
-    sourceY,
-    sourceWidth,
-    sourceHeight,
-    -canvas.width / 2,
-    -canvas.height / 2,
-    canvas.width,
-    canvas.height,
-  )
-
-  // Convert to black and white
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-  const data = imageData.data
-
-  for (let i = 0; i < data.length; i += 4) {
-    // Calculate grayscale value using luminance formula
-    const gray = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2])
-
-    // Set RGB to the same grayscale value
-    data[i] = gray // Red
-    data[i + 1] = gray // Green
-    data[i + 2] = gray // Blue
-    // Alpha (data[i + 3]) stays the same
-  }
-
-  // Put the modified image data back
-  ctx.putImageData(imageData, 0, 0)
-
-  return canvas.toDataURL("image/jpeg", 0.85)
+  return optimizedCanvas.toDataURL("image/jpeg", 0.85)
 }

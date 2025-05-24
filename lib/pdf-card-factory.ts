@@ -4,14 +4,14 @@ import { cropImageTo3x4 } from "@/lib/image-utils"
 import { drawCardFace, drawFlippedCardFace } from "@/lib/pdf-card-renderer"
 
 export function formatDateText(card: TimelineCard, yearCounts: Record<number, number>): string {
-  const needsMonth = yearCounts[card.year] > 1
-
-  if (needsMonth && card.fullDate) {
+  // Always show month when we have a full date, regardless of year conflicts
+  if (card.fullDate) {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     const month = monthNames[card.fullDate.getMonth()]
     return `${month} ${card.year}`
   }
 
+  // Fallback to just year if no full date available
   return card.year.toString()
 }
 
