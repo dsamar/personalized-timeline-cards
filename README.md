@@ -47,32 +47,32 @@ This digital tool creates personalized versions of the Timeline game using your 
 ┌─────────────────────────────────────────────────────────────┐
 │                     Timeline Card Creator                   │
 ├─────────────────────────────────────────────────────────────┤
-│  Frontend (Next.js + React)                                │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
-│  │   Upload UI     │  │   Card Editor   │  │ PDF Export  │ │
-│  │                 │  │                 │  │             │ │
-│  │ • Drag & Drop   │  │ • Event Names   │  │ • Layout    │ │
+│  Frontend (Next.js + React)                                 │
+│  ┌──────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │   Upload UI      │  │   Card Editor   │  │ PDF Export  │ │
+│  │                  │  │                 │  │             │ │
+│  │ • Drag & Drop    │  │ • Event Names   │  │ • Layout    │ │
 │  │ • File Validation│  │ • Year Editing  │  │ • Printing  │ │
-│  │ • EXIF Reading  │  │ • Sorting       │  │ • Download  │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+│  │ • EXIF Reading   │  │ • Sorting       │  │ • Download  │ │
+│  └──────────────────┘  └─────────────────┘  └─────────────┘ │
 ├─────────────────────────────────────────────────────────────┤
 │  Core Processing Layer                                      │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
-│  │  Image Utils    │  │  EXIF Utils     │  │ PDF Engine  │ │
-│  │                 │  │                 │  │             │ │
-│  │ • Crop to 3:4   │  │ • Date Extract  │  │ • Canvas    │ │
-│  │ • B&W Convert   │  │ • Fallbacks     │  │ • Rendering │ │
-│  │ • Canvas Ops    │  │ • Validation    │  │ • Layout    │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐  │
+│  │  Image Utils    │  │  EXIF Utils     │  │ PDF Engine  │  │
+│  │                 │  │                 │  │             │  │
+│  │ • Crop to 3:4   │  │ • Date Extract  │  │ • Canvas    │  │
+│  │ • B&W Convert   │  │ • Fallbacks     │  │ • Rendering │  │
+│  │ • Canvas Ops    │  │ • Validation    │  │ • Layout    │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────┘  │
 ├─────────────────────────────────────────────────────────────┤
 │  Data Layer                                                 │
-│  ┌─────────────────┐  ┌─────────────────┐                  │
-│  │  State Mgmt     │  │  Local Cache    │                  │
-│  │                 │  │                 │                  │
-│  │ • Card Array    │  │ • Event Names   │                  │
-│  │ • Sorting       │  │ • Persistence   │                  │
-│  │ • Updates       │  │ • Cache Cleanup │                  │
-│  └─────────────────┘  └─────────────────┘                  │
+│  ┌─────────────────┐  ┌─────────────────┐                   │
+│  │  State Mgmt     │  │  Local Cache    │                   │
+│  │                 │  │                 │                   │
+│  │ • Card Array    │  │ • Event Names   │                   │
+│  │ • Sorting       │  │ • Persistence   │                   │
+│  │ • Updates       │  │ • Cache Cleanup │                   │
+│  └─────────────────┘  └─────────────────┘                   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
