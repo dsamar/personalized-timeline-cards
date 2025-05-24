@@ -43,7 +43,7 @@ This digital tool creates personalized versions of the Timeline game using your 
 
 ## 🏗️ Architecture Overview
 
-\`\`\`
+```
 ┌─────────────────────────────────────────────────────────────┐
 │                     Timeline Card Creator                   │
 ├─────────────────────────────────────────────────────────────┤
@@ -74,11 +74,11 @@ This digital tool creates personalized versions of the Timeline game using your 
 │  │ • Updates       │  │ • Cache Cleanup │                  │
 │  └─────────────────┘  └─────────────────┘                  │
 └─────────────────────────────────────────────────────────────┘
-\`\`\`
+```
 
 ## 📁 Project Structure
 
-\`\`\`
+```
 timeline-card-creator/
 ├── app/
 │   ├── layout.tsx          # Root layout with metadata
@@ -100,29 +100,29 @@ timeline-card-creator/
 ├── types/
 │   └── timeline-card.ts    # TypeScript interfaces
 └── README.md
-\`\`\`
+```
 
 ## 🔄 Data Flow
 
 ### 1. Image Upload Process
-\`\`\`typescript
+```
 User uploads images → react-dropzone → File validation → EXIF extraction → TimelineCard creation
-\`\`\`
+```
 
 ### 2. EXIF Date Extraction
-\`\`\`typescript
+```
 File → ExifReader → Date parsing → Fallback to file.lastModified → Year extraction
-\`\`\`
+```
 
 ### 3. Card State Management
-\`\`\`typescript
+```
 Cards array → Sorting by date → React state updates → UI re-rendering
-\`\`\`
+```
 
 ### 4. PDF Generation Pipeline
-\`\`\`typescript
+```
 Cards → Image processing → Canvas rendering → PDF layout → File download
-\`\`\`
+```
 
 ## 🎨 Key Features
 
@@ -169,12 +169,12 @@ The generated cards create a Timeline-style board game where:
 - npm or yarn
 
 ### Installation
-\`\`\`bash
+```bash
 git clone [GITHUB_LINK_PLACEHOLDER]
 cd timeline-card-creator
 npm install
 npm run dev
-\`\`\`
+```
 
 ### Usage
 1. Upload 5-24 photos from different time periods
