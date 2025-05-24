@@ -44,6 +44,7 @@ export function InstructionsCard() {
                 <li>Deal 4 cards to each player (year side hidden)</li>
                 <li>Place one card in center with year showing</li>
                 <li>Keep remaining cards as draw pile</li>
+                <li>The youngest player goes first</li>
               </ul>
 
               <p>

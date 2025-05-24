@@ -5,6 +5,7 @@ import type { TimelineCard } from "@/types/timeline-card"
 import { UploadSection } from "@/components/upload-section"
 import { CardsGrid } from "@/components/cards-grid"
 import { InstructionsCard } from "@/components/instructions-card"
+import { ExternalLink, Github } from "lucide-react"
 
 function sortCards(cards: TimelineCard[]): TimelineCard[] {
   return cards.sort((a, b) => {
@@ -67,10 +68,51 @@ export default function TimelineCardCreator() {
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Timeline Card Creator</h1>
-        <p className="text-muted-foreground">
-          Create personalized timeline cards from your photos. Upload images and we'll extract dates from EXIF data.
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Timeline Card Creator</h1>
+            <p className="text-muted-foreground">
+              Create personalized timeline cards from your photos. Upload images and we'll extract dates from EXIF data.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://github.com/dsamar/personalized-timeline-cards"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Github className="h-4 w-4" />
+              GitHub
+            </a>
+          </div>
+        </div>
+
+        <div className="bg-muted/50 border border-muted rounded-lg p-4">
+          <p className="text-sm text-muted-foreground">
+            <strong>Game Attribution:</strong> Inspired by{" "}
+            <a
+              href="https://boardgamegeek.com/boardgame/128664/timeline"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline inline-flex items-center gap-1"
+            >
+              Timeline (2012)
+              <ExternalLink className="h-3 w-3" />
+            </a>{" "}
+            by Frédéric Henry. Art by{" "}
+            <a
+              href="https://www.jeremiefleury.art/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline inline-flex items-center gap-1"
+            >
+              Jérémie Fleury
+              <ExternalLink className="h-3 w-3" />
+            </a>{" "}
+            and team. Published by Asmodee. This tool creates personalized versions using your photos.
+          </p>
+        </div>
       </div>
 
       <UploadSection cards={cards} onCardsAdd={addCards} />
